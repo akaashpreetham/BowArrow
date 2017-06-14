@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Hit the Target</title>
+	<link rel="stylesheet" type="text/css" href="B&A.css">
+</head>
+<body onload="start()">
+	<p><strong>INSTRUCTIONS</strong><br>Press Spacebar to shoot arrows<br>5 arrows per game<br>Red Circle=50<br>Yellow Circle=30<br>Blue Circle=20</p>
+	<h1>SCORE:0</h1>
+	<h1>Press P to Pause</h1>
+	<audio src="The Arrow CW-Main Theme.mp3"></audio>
+	<script type="text/javascript">
+		var bow;
+		var arrow=[];
+		var index=0;
+		var tgt; 
+		var increment=0;
+		var score=0;
+		var pause=0;
+		function start(){
+			area.create();
+			bow=new drawBow(20);
+			tgt=new drawTarget(1100,100);
+			arrow[index]=new drawArrow(17,120);
+			var aud=document.getElementsByTagName("audio")[0];
+			aud.play();
+		}
+		var area={
+			canvas:document.createElement("canvas"),
+			create:function(){
+				this.canvas.width=1200;
+				this.canvas.height=550;
+				this.context=this.canvas.getContext("2d");
+				document.body.insertBefore(this.canvas,document.body.childNodes[0]);
+				this.interval=setInterval(updateGameArea,20);
+			},
+			erase:function(){
+				this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+			}
+		}
+		function drawBow(y){
+			var ctx=area.context;
+			this.y=y;
+			this.height=200;
+    			this.speedY=0;
+    		this.update=function(){
+				ctx.beginPath();
+				ctx.lineWidth=2;
+				ctx.strokeStyle="silver";
+				ctx.moveTo(20,this.y);
+				ctx.lineTo(20,200+this.y);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.lineWidth=6;
+				ctx.lineCap="round";
+				ctx.strokeStyle="goldenrod";
+				ctx.moveTo(20,this.y);
+				ctx.arcTo(20,20+this.y,40,20+this.y,20);
+				ctx.quadraticCurveTo(60,50+this.y,70,90+this.y);
+				ctx.moveTo(20,200+this.y);
+				ctx.arcTo(20,180+this.y,40,180+this.y,20);
+				ctx.quadraticCurveTo(60,150+this.y,70,110+this.y);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.lineWidth=8;
+				ctx.strokeStyle="crimson";
+				ctx.lineCap="round";
+				ctx.moveTo(70,87+this.y);
+				ctx.lineTo(70,113+this.y);
+				ctx.stroke();
+			}	
+			this.newPos = function() {
+				this.y += this.speedY; 
+    		}
+		}
+		function drawTarget(x,y){
+			var ctx=area.context;
+			this.x=x;
+			this.y=y;
+			this.speedY=5;
+			this.update=function(){
+				ctx.beginPath();
+				ctx.lineWidth=3;
+				ctx.ellipse(this.x,this.y,60,100,0,0,2*Math.PI);
+				ctx.fillStyle="darkblue";
+				ctx.strokeStyle="black";
+				ctx.stroke();
+				ctx.fill();
+				ctx.beginPath();
+				ctx.lineWidth=3;
+				ctx.ellipse(this.x,this.y,60*(2/3),100*(2/3),0,0,2*Math.PI);
+				ctx.fillStyle="yellow";
+				ctx.strokeStyle="black";
+				ctx.stroke();
+				ctx.fill();		
+				ctx.beginPath();
+				ctx.lineWidth=3;
+				ctx.ellipse(this.x,this.y,60*(1/3),100*(1/3),0,0,2*Math.PI);
+				ctx.fillStyle="red";
+				ctx.strokeStyle="black";
+				ctx.stroke();
+				ctx.fill();
+			}
+			this.newPos = function() {
+				this.y+=this.speedY; 
+				if(this.y-100==0||this.y+100==550){
+					this.speedY=-this.speedY;
+				}
+    		}
+		}
+		function drawArrow(x,y){
+			var ctx=area.context;
+			this.x=x;
+			this.y=y;
+			this.speedX=0;
+			this.speedY=0;
+			this.released=1;
+			this.update=function(){
+				ctx.beginPath();
+				ctx.strokeStyle="darkgrey";
+				ctx.lineWidth=3;
+				ctx.moveTo(this.x,this.y-5);
+				ctx.lineTo(this.x+3,this.y-5);
+				ctx.lineTo(this.x+5,this.y);
+				ctx.lineTo(this.x+63,this.y);
+				ctx.moveTo(this.x+5,this.y);
+				ctx.lineTo(this.x+3,this.y+5);
+				ctx.lineTo(this.x,this.y+5);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.fillStyle="silver";
+				ctx.moveTo(this.x+63,this.y);
+				ctx.lineTo(this.x+56,this.y-5);
+				ctx.lineTo(this.x+73,this.y);
+				ctx.lineTo(this.x+56,this.y+5);
+				ctx.lineTo(this.x+63,this.y);
+				ctx.fill();
+			}
+			this.newPos = function() {
+				this.y+=this.speedY; 
+				this.x+=this.speedX;
+    			}
+    			this.isCrashing=function(obstacle){
+    				var arLeft=this.x;
+    				var arRight=this.x+73;
+    				var arTop=this.y-5;
+    				var arY=this.y;
+    				var arBottom=this.y+5;
+    				var obsX=obstacle.x;
+    				var obsTop=obstacle.y-100;
+    				var obsBottom=obstacle.y+100;
+    				var crash=true;
+    				if(((arY>=obsTop&&arY<=obsTop+100/3)||(arY<=obsBottom&&arY>=obsBottom-100/3))&&this.speedX!=0)
+    					this.scoreIncrease=20;
+    				if(((arY>=obsTop+100/3&&arY<=obsTop+(100*2/3))||(arY<=obsBottom-100/3&&arY>=obsBottom-(100*2/3)))&&this.speedX!=0)
+    					this.scoreIncrease=30;
+    				if((arY>=obsTop+(100*2/3)&&arY<=obsBottom-(100*2/3))&&this.speedX!=0)
+    					this.scoreIncrease=50;
+    				if(arBottom<obsTop||arTop>obsBottom||arRight<obsX||arLeft>obsX){
+    					crash=false;
+    					this.scoreIncrease=0;
+    				}
+    				return crash;
+    			}
+    			this.newArrow=function(){
+    				if(this.isCrashing(tgt))
+    					return 1;
+    				if(this.x>area.canvas.width)
+    					return 1;
+    				else
+    					return 0;
+    			}
+		}
+		function updateGameArea(){
+			area.erase();
+			if(arrow[index].isCrashing(tgt)){
+				arrow[index].speedX=0;
+				arrow[index].speedY=tgt.speedY;
+			}
+			if(index<5){
+				if(arrow[index].newArrow()){
+					if(arrow[index].scoreIncrease!=0)
+						score+=arrow[index].scoreIncrease;
+					document.getElementsByTagName("h1")[0].innerHTML="SCORE:"+score;
+					index+=1;
+					arrow[index]=new drawArrow(17,bow.y+(bow.height)/2);
+				}
+				bow.newPos();
+	  			arrow[index].newPos();
+				tgt.newPos();
+	  			bow.update();
+	  			tgt.update();
+	  			arrow[index].update();
+			}	  		
+			if(index==5){
+				clearInterval(area.interval);
+				area.erase();
+				gameOver();
+			}
+		}
+		addEventListener("keydown",function(event){
+			if(event.keyCode==32){
+				arrowRight();
+				arrow[index].released=0;
+			}
+			if(event.keyCode==40||event.keyCode==83)
+			{
+				bowDown();
+				if(arrow[index].released)
+					arrowDown();
+			}
+			if(event.keyCode==38||event.keyCode==87)
+			{
+				bowUp();
+				if(arrow[index].released)
+					arrowUp();
+			}
+			if(event.keyCode==80){
+				pause++;
+				if(pause%2){
+					clearInterval(area.interval);
+					document.getElementsByTagName("h1")[1].innerHTML="Press P to Resume";
+				}
+				else{
+					area.interval=setInterval(updateGameArea,20);
+					document.getElementsByTagName("h1")[1].innerHTML="Press P to Pause";
+				}
+			}
+		});
+		addEventListener("keyup",function(event){
+			if(event.keyCode==40||event.keyCode==83)
+			{
+				stopMove();
+			}
+			if(event.keyCode==38||event.keyCode==87)
+			{
+				stopMove();
+			}
+		});
+		function bowDown(){
+			bow.speedY=2;
+		}
+		function bowUp(){
+			bow.speedY=-2;
+		}
+		function arrowDown(){
+			arrow[index].speedY=2;
+		}
+		function arrowUp(){
+			arrow[index].speedY=-2;
+		}
+		function arrowRight(){
+			arrow[index].speedX=15;
+			arrow[index].released=0;
+		}
+		function stopMove(){
+			bow.speedY=0;
+			arrow[index].speedY=0;
+		}
+		function gameOver(){
+			document.body.removeChild(document.body.firstChild);
+			document.getElementsByTagName("h1")[1].innerHTML="Press R to Restart";
+			addEventListener("keydown",function(event){
+				if(event.keyCode==82){
+					index=0;
+					increment=0;
+					score=0;
+					document.getElementsByTagName("h1")[0].innerHTML="SCORE:0";
+					document.getElementsByTagName("h1")[1].innerHTML="Press P to Pause";
+					start();
+				}
+			});
+		}
+	</script>
+</body>
+</html>

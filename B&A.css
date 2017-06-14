@@ -1,0 +1,54 @@
+body{
+	margin: 0px;
+}
+html{
+	background-color: cyan;
+	background-repeat: no-repeat;
+	color: black;
+}
+h1{
+	position: relative;
+	display: inline;
+	padding: 2px;
+	left: 5px;
+	top:10px;
+	border: 2px solid black;
+	animation-name: colorChange;
+	animation-iteration-count: infinite;
+	animation-duration: 8s;
+}
+@keyframes colorChange{
+	0%{
+		color:black;
+		border-color: black;
+	}
+	25%{
+		color:darkblue;
+		border-color: darkblue;
+	}
+	50%{
+		color:green;
+		border-color: green;
+	}
+	75%{
+		color:orange;
+		border-color: orange;
+	}
+	100%{
+		color:black;
+		border-color: black;
+	}
+}
+canvas{
+	position: absolute;
+	top:100px;
+	left: 100px;
+	background-image: url("http://wallpaperswide.com/download/black_background_wood-wallpaper-1280x768.jpg");
+}
+p{
+	position: absolute;
+	right:1px;
+	padding: 3px;
+	border: 2px solid black;
+	word-wrap: break-word;
+}
